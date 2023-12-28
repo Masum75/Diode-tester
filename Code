@@ -1,0 +1,63 @@
+/*Step-01: Configure LCD module */
+// LCD module connections
+sbit LCD_RS at RB7_bit;
+sbit LCD_EN at RB6_bit;
+sbit LCD_D4 at RB5_bit;
+sbit LCD_D5 at RB4_bit;
+sbit LCD_D6 at RB3_bit;
+sbit LCD_D7 at RB2_bit;
+
+sbit LCD_RS_Direction at TRISB7_bit;
+sbit LCD_EN_Direction at TRISB6_bit;
+sbit LCD_D4_Direction at TRISB5_bit;
+sbit LCD_D5_Direction at TRISB4_bit;
+sbit LCD_D6_Direction at TRISB3_bit;
+sbit LCD_D7_Direction at TRISB2_bit;
+// End LCD module connections
+
+/*Step-02: Set Variable for pins */
+sbit TestPin1 at RA0_bit;
+sbit TestPin2 at RA1_bit;
+
+// Declear variable for store data
+unsigned int test1, test2;
+
+void main() {
+     ADCON1 = 7;                      // All analog pin set as digital pin, Take value as VDD or VSS
+     CMCON = 7;                     //to shut off the comparators and
+     Lcd_Init();                      // Initialize LCD
+     Lcd_Cmd(_LCD_CLEAR);             // CLEAR display
+     Lcd_Cmd(_LCD_CURSOR_OFF);        // Cursor off
+     Lcd_Out(1,2,"Diode Testing");    // Write message1 in 1st row
+
+     do {
+       TRISA = 0b00000010;            // RA0 as Output pin , RA1 as Input
+       TestPin1 = 1;                  // Make output pin(RA0) HIGH
+       test1 = TestPin2 ;             // Read data (VSS or VDD) from RA2
+
+       TestPin1 = 0;                  // Clear data from RA0
+
+       TRISA = 0b00000001;            // RA0 as input pin , RA1 as Output
+       TestPin2 = 1;                  // Make output pin(RA2) HIGH
+       test2 = TestPin1;              // Read data (VSS or VDD) from RA0
+
+       TestPin2 = 0;                  // Clear data from RA2
+
+       if((test1==1) && (test2 ==1)){
+            Lcd_Out(2,2,"Result: Short");
+       }
+
+       else if((test1==1) && (test2 ==0)){
+           Lcd_Out(2,2,"Result: Good");
+       }
+
+       else if((test1==0) && (test2 ==1)){
+          Lcd_Out(2,2,"Result: Good");
+       }
+
+       else if((test1==0) && (test2 ==0)){
+         Lcd_Out(2,2,"Result: Open");
+       }
+
+     } while(1);   // End Loop
+}
